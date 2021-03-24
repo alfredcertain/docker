@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 AS asterisk16-ubuntu
 
 LABEL maintainer="Alfred Certain <alfred.certain@gecko.co>"
 
@@ -11,7 +11,8 @@ RUN apt-get -y update \
 && apt-get -y install git wget vim pwgen gzip rsync mariadb-client \
 && apt-get -y install odbcinst odbcinst1debian2 libodbc1 \
 && apt-get -y install ssmtp sox lame mc screen \
-&& apt-get -y autoremove
+&& apt-get -y autoremove \
+&& apt-get clean
 
 RUN cd /usr/src \
   && wget https://dev.mysql.com/get/Downloads/Connector-ODBC/8.0/mysql-connector-odbc_8.0.21-1ubuntu20.04_amd64.deb \
@@ -52,6 +53,7 @@ RUN cd /usr/src \
 
 EXPOSE 5038 4445 3306 5060 5061 5160 5161 4569 8088 8089 10000-20000/udp 10000-20000/tcp
 
+COPY docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
 WORKDIR /etc/asterisk
-
-ENTRYPOINT ["/usr/sbin/asterisk -f -U root -G root"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
